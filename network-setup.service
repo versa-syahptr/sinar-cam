@@ -1,0 +1,9 @@
+[Unit]
+Description=My Startup Service
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 /home/pi/sinar-cam/sinar-cam.py @arg
+
+[Install]
+WantedBy=multi-user.target
