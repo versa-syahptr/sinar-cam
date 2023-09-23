@@ -114,7 +114,7 @@ def index():
 
 def setup():
     led.red()
-    check_root()
+    # check_root()
     if check_wifi():
         print("wifi connected")
         led.blue()

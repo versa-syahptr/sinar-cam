@@ -58,10 +58,8 @@ def notify_tracker(cam_id, action="start"):
     r = requests.get(f"https://{SINAR_URL}/{action}-tracker/{cam_id}")
     print(f"{r.status_code} : {r.text}")
 
-def stream_dvs(args):
-    args = verify_args(args)
-    device = args.device
-    output = f"rtmp://{SINAR_URL}/input/{args.id}"
+def stream_dvs(cam_id, device):
+    output = f"rtmp://{SINAR_URL}/input/{cam_id}"
 
     cmd = ['ffmpeg',
             '-f',
@@ -82,15 +80,15 @@ def stream_dvs(args):
             'flv',
             output
     ]
-    notify_tracker(args.id, "start")
+    notify_tracker(cam_id, "start")
     try:
         subprocess.run(cmd)
     except (KeyboardInterrupt, SystemExit):
-        notify_tracker(args.id, "stop")
+        notify_tracker(cam_id, "stop")
         print('Exiting...')
 
-def stream_cam(args):
-    output = f"rtmp://{SINAR_URL}/input/{args.id}"
+def stream_cam(cam_id):
+    output = f"rtmp://{SINAR_URL}/input/{cam_id}"
     subprocess.run(["cam.sh", output])
     
 
@@ -127,11 +125,16 @@ if __name__ == '__main__':
 
     ping()
 
-    cam_cmd.set_defaults(func=stream_cam)
-    dvs_cmd.set_defaults(func=stream_dvs)
-    push_cmd.set_defaults(func=stream_push)
-
-
     args = parser.parse_args()
-    args.func(args)
+    args = verify_args(args)
+    print(f"starting sinar-cam (mode: {args.mode})")
+    if args.mode == 'cam':
+        stream_cam(args.id)
+    elif args.mode == 'dvs':
+        stream_dvs(args.id, args.device)
+    elif args.mode == 'push':
+        stream_push(args.input)
+    else:
+        raise Exception("invalid mode")
+    
     
